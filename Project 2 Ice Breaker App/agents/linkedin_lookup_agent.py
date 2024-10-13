@@ -1,7 +1,18 @@
 import os
+import sys
+
+# Get the current working directory
+current_dir = os.getcwd()
+
+# Add the current directory to the Python path
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
+
 from dotenv import load_dotenv
 
 load_dotenv()
+    
 from langchain_openai import ChatOpenAI
 from langchain.prompts.prompt import PromptTemplate
 from langchain_core.tools import Tool
@@ -16,12 +27,13 @@ def lookup(name: str) -> str:
     llm = ChatOpenAI(
         temperature=0,
         model_name="gpt-3.5-turbo",
+        openai_api_key=os.environ["OPENAI_API_KEY"]
     )
     template = """given the full name {name_of_person} I want you to get it me a link to their Linkedin profile page.
                               Your answer should contain only a URL"""
 
     prompt_template = PromptTemplate(
-        template=template, input_variables=["name_of_person"]
+        template=template, input_variables=["name_of_person"] 
     )
     tools_for_agent = [
         Tool(
@@ -41,3 +53,5 @@ def lookup(name: str) -> str:
 
     linked_profile_url = result["output"]
     return linked_profile_url
+
+#print(lookup("Eden Marco"))

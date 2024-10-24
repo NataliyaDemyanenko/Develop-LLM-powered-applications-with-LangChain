@@ -8,12 +8,13 @@ import os
 
 from third_parties.linkedin import scrape_linkedin_profile
 from third_parties.twitter import scrape_user_tweets_mock
+from output_parsers import summary_parser, Summary
 
 load_dotenv()
 
 api_key = os.getenv("OPENAI_API_KEY")
 
-def ice_break_with(name: str) -> str:
+def ice_break_with(name: str) -> tuple[Summary, str]:
     linkedin_username = linkedin_lookup_agent(name=name)
     linkedin_data = scrape_linkedin_profile(linkedin_profile_url=linkedin_username)
 
@@ -42,9 +43,9 @@ def ice_break_with(name: str) -> str:
 
     chain = summary_prompt_template | llm | summary_parser
     linkedin_data = scrape_linkedin_profile(linkedin_profile_url="https://www.linkedin.com/in/eden-marco/", mock = True)
-    res = chain.invoke(input={"information": linkedin_data, "twitter_posts": tweets})
+    res:Summary = chain.invoke(input={"information": linkedin_data, "twitter_posts": tweets})
 
-    print(res)
+    return res, linkedin_data.get("profile_pic_url")
 
 
 if __name__ == "__main__":
